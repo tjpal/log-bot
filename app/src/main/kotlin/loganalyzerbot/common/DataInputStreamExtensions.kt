@@ -4,8 +4,8 @@ import java.io.DataInputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-fun DataInputStream.readLong(numBytes: Int): Long {
-    val bytes = ByteArray(numBytes)
+fun DataInputStream.read32BitLong(): Long {
+    val bytes = ByteArray(4)
     this.readFully(bytes)
     return ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).int.toLong()
 }
