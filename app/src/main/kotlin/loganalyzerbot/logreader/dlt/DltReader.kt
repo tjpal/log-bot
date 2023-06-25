@@ -1,11 +1,15 @@
 package loganalyzerbot.logreader.dlt
 
+import loganalyzerbot.logreader.LogMessage
+import loganalyzerbot.logreader.LogReader
+import loganalyzerbot.logreader.LogType
 import java.io.DataInputStream
 import java.io.File
 import java.io.FileInputStream
+import java.util.*
 
-class DltReader {
-    fun read(dltFile: File): Array<DltMessage> {
+class DltReader : LogReader {
+    override fun read(dltFile: File): Array<LogMessage> {
         val fileInputStream = FileInputStream(dltFile)
 
         val inputStream = DataInputStream(fileInputStream)
@@ -16,8 +20,8 @@ class DltReader {
     }
 
     private fun readDLTMessages(fileInputStream: FileInputStream,
-                                inputStream: DataInputStream): Array<DltMessage> {
-        val dltMessages = mutableListOf<DltMessage>()
+                                inputStream: DataInputStream): Array<LogMessage> {
+        val dltMessages = mutableListOf<LogMessage>()
 
         while (inputStream.available() > 0) {
             dltMessages.add(readNextDLTMessage(fileInputStream, inputStream))
@@ -27,7 +31,7 @@ class DltReader {
     }
 
     private fun readNextDLTMessage(fileInputStream: FileInputStream,
-                                   inputStream: DataInputStream): DltMessage {
+                                   inputStream: DataInputStream): LogMessage {
         val startHeaderOffset = fileInputStream.channel.position()
 
         val storageHeader = DltStorageHeader(inputStream)
@@ -48,7 +52,11 @@ class DltReader {
                                             (endHeaderOffset - startHeaderOffset).toInt(),
                                             isLog)
 
-        return DltMessage(payload, storageHeader.seconds, isLog)
+        return LogMessage(payload,
+                          Date(storageHeader.seconds * 1000 + storageHeader.microseconds),
+                          extendedHeader.applicationId,
+                          extendedHeader.contextId,
+                          if(isLog) LogType.LOG else LogType.CONTROL)
     }
 
     private fun readDLTMessagePayload(inputStream: DataInputStream,

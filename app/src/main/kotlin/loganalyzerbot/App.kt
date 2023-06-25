@@ -4,6 +4,7 @@
 */
 package loganalyzerbot
 
+import loganalyzerbot.logreader.LogType
 import loganalyzerbot.logreader.dlt.DltReader
 import java.io.File
 
@@ -13,7 +14,7 @@ fun main(vararg args: String) {
         return
     }
 
-    DltReader().read(File(args[0])).filter { it.isLog }. forEach {
+    DltReader().read(File(args[0])).filter { it.type == LogType.LOG }. forEach {
         println(it.message)
     }
 }
