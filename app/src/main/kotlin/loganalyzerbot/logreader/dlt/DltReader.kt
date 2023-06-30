@@ -35,13 +35,14 @@ class DltReader : LogReader {
 
     private fun readNextDLTMessage(fileInputStream: FileInputStream,
                                    inputStream: DataInputStream): LogMessage {
-        val startHeaderOffset = fileInputStream.channel.position()
-
-        val storageHeader = DltStorageHeader(inputStream)
-        if (!storageHeader.pattern.startsWith("DLT")) {
+        if(!syncToDLTStorageHeader(inputStream)) {
             throw Exception("Invalid DLT file")
         }
 
+        // Offset of the start of the header (subtract the magic 'DLT' pattern)
+        val startHeaderOffset = fileInputStream.channel.position() - 4
+
+        val storageHeader = DltStorageHeader(inputStream)
         val standardHeader = DltStandardHeader(inputStream)
         val extraHeader = DltStandardHeaderExtra(inputStream, standardHeader)
         val extendedHeader = DltExtendedHeader(inputStream, standardHeader)
@@ -60,6 +61,24 @@ class DltReader : LogReader {
                           extendedHeader.applicationId,
                           extendedHeader.contextId,
                           if(isLog) LogType.LOG else LogType.CONTROL)
+    }
+
+    private fun syncToDLTStorageHeader(inputStream: DataInputStream): Boolean {
+        // The following code searches for the 'DLT' magic pattern to find the
+        // next log entry. This is more a workaround because DLT files contain
+        // also other storage types (serial messages). As it is difficult to
+        // find their specification, we use this workaround to skip them.
+        val syncPattern = arrayOf(0x44,0x4C,0x54,0x01)
+
+        while(inputStream.available() > 0) {
+            for(c in syncPattern) {
+                if(inputStream.readByte().toInt() != c) {
+                    return false
+                }
+            }
+        }
+
+        return true
     }
 
     private fun readDLTMessagePayload(inputStream: DataInputStream,
