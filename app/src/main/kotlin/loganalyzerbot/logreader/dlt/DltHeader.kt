@@ -5,12 +5,10 @@ import loganalyzerbot.common.read32BitLong
 import loganalyzerbot.common.readString
 import java.io.DataInputStream
 
-class DltStorageHeader(var pattern: String,
-                       var seconds: Long,
+class DltStorageHeader(var seconds: Long,
                        var microseconds: Long,
                        var ecuId: String) {
     constructor(inputStream: DataInputStream) : this(
-        inputStream.readString(4),
         inputStream.read32BitLong(),
         inputStream.read32BitLong(),
         inputStream.readString(4)
