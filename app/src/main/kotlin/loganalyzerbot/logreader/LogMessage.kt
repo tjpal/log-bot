@@ -9,6 +9,6 @@ enum class LogType {
 
 data class LogMessage(val message: String,
                       val time: Date,
-                      val context: String,
-                      val subContext: String,
+                      val contextId: UInt,
+                      val subContextId: UInt,
                       val type: LogType)
