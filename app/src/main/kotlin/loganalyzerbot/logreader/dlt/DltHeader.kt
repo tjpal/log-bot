@@ -26,8 +26,8 @@ class DltStandardHeader(private var headerTyp: Int, var messageCounter: Byte, va
     )
 
     fun isExtendedHeaderUsed(): Boolean = headerTyp and 1 == 1
-    fun isWithECUId(): Boolean = headerTyp shr 1 and 1 == 1
-    fun isWithSessionId(): Boolean = headerTyp shr 2 and 1 == 1
+    fun isWithECUId(): Boolean = headerTyp shr 2 and 1 == 1
+    fun isWithSessionId(): Boolean = headerTyp shr 3 and 1 == 1
     fun isWithTimestamp(): Boolean = headerTyp shr 4 and 1 == 1
 }
 
