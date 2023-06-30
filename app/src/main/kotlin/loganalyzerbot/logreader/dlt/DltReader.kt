@@ -24,7 +24,10 @@ class DltReader : LogReader {
         val dltMessages = mutableListOf<LogMessage>()
 
         while (inputStream.available() > 0) {
-            dltMessages.add(readNextDLTMessage(fileInputStream, inputStream))
+            val dltMessage = readNextDLTMessage(fileInputStream, inputStream)
+
+            if(dltMessage != null)
+                dltMessages.add(dltMessage)
         }
 
         return dltMessages.toTypedArray()
@@ -44,7 +47,7 @@ class DltReader : LogReader {
         val extendedHeader = DltExtendedHeader(inputStream, standardHeader)
 
         val endHeaderOffset = fileInputStream.channel.position()
-        val isLog = extendedHeader.messageInfo.toInt() == 0
+        val isLog = extendedHeader.messageInfo.toInt() == 0 || extendedHeader.messageInfo.toInt() == 2
 
         val payload = readDLTMessagePayload(inputStream,
                                             standardHeader,
