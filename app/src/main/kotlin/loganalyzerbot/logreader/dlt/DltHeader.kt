@@ -3,6 +3,7 @@ package loganalyzerbot.logreader.dlt
 import loganalyzerbot.common.read16BitInt
 import loganalyzerbot.common.read32BitLong
 import loganalyzerbot.common.readString
+import loganalyzerbot.common.readUInt
 import java.io.DataInputStream
 
 class DltStorageHeader(var seconds: Long,
@@ -38,11 +39,11 @@ class DltStandardHeaderExtra(var ecu: String, var sessionNumber: Long, var times
     )
 }
 
-class DltExtendedHeader(var messageInfo: Byte, var numberOfArguments: Byte, var applicationId: String, var contextId: String) {
+class DltExtendedHeader(var messageInfo: Byte, var numberOfArguments: Byte, var applicationId: UInt, var contextId: UInt) {
     constructor(inputStream: DataInputStream, standardHeader: DltStandardHeader) : this(
         if(standardHeader.isExtendedHeaderUsed()) inputStream.readByte() else 0,
         if(standardHeader.isExtendedHeaderUsed()) inputStream.readByte() else 0,
-        if(standardHeader.isExtendedHeaderUsed()) inputStream.readString(4) else "",
-        if(standardHeader.isExtendedHeaderUsed()) inputStream.readString(4) else ""
+        if(standardHeader.isExtendedHeaderUsed()) inputStream.readUInt() else 0u,
+        if(standardHeader.isExtendedHeaderUsed()) inputStream.readUInt() else 0u,
     )
 }
