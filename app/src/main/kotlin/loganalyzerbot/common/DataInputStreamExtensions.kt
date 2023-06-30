@@ -23,6 +23,6 @@ fun DataInputStream.readString(numBytes: Int): String {
 }
 
 fun DataInputStream.read16BitInt(): Int {
-    return this.readByte().toUByte().toInt() * 256 +
-            this.readByte().toUByte().toInt()
+    return (this.readUnsignedByte().toUInt() * 256U +
+            this.readUnsignedByte().toUInt()).toInt()
 }

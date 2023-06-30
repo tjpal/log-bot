@@ -106,10 +106,12 @@ class DltReader(private val filter: DltFilter) : LogReader {
 
             if (isString || isRaw) {
                 // Why are the bytes here inverted ?!
-                val dataLength = inputStream.readByte().toUInt() + inputStream.readByte().toUInt() * 256U
+                val dataLength = inputStream.readUnsignedByte().toUInt() +
+                                 inputStream.readUnsignedByte().toUInt() * 256U
 
                 if (containsVariableInfo) {
-                    val variableInfoSize = inputStream.readByte().toUInt() + inputStream.readByte().toUInt() * 256U
+                    val variableInfoSize = inputStream.readUnsignedByte().toUInt() +
+                                           inputStream.readUnsignedByte().toUInt() * 256U
                     inputStream.skip(variableInfoSize.toLong())
                 }
 
