@@ -123,6 +123,7 @@ class DltReader(private val filter: DltFilter) : LogReader {
                 return data.toString(Charsets.US_ASCII)
             } else {
                 inputStream.skip(payloadSize - 4)
+                return ""
             }
         }
 
