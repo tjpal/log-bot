@@ -3,7 +3,6 @@ package loganalyzerbot.logreader.dlt
 import loganalyzerbot.common.read32BitLong
 import loganalyzerbot.logreader.LogMessage
 import loganalyzerbot.logreader.LogReader
-import loganalyzerbot.logreader.LogType
 import java.io.DataInputStream
 import java.io.File
 import java.io.FileInputStream
@@ -56,24 +55,23 @@ class DltReader(private val filter: DltFilter) : LogReader {
         val payloadSize = standardHeader.length -
                           (endHeaderOffset - startHeaderOffset - storageHeader.size)
 
-        if(!filter.filter(extendedHeader.applicationId, extendedHeader.contextId)) {
+        if(!extendedHeader.isLog() || !filter.filter(extendedHeader.applicationId, extendedHeader.contextId)) {
             fileInputStream.skip(payloadSize)
             return null
         }
 
-        val isLog = extendedHeader.messageInfo.toUInt() and 0x0EU == 0U
-
         val payload = readDLTMessagePayload(inputStream,
                                             storageHeader,
                                             extendedHeader,
-                                            payloadSize,
-                                            isLog)
+                                            payloadSize)
+
+        if(payload.isEmpty())
+            return null
 
         return LogMessage(payload,
                           Date(storageHeader.seconds * 1000 + storageHeader.microseconds),
                           extendedHeader.applicationId,
-                          extendedHeader.contextId,
-                          if(isLog) LogType.LOG else LogType.CONTROL)
+                          extendedHeader.contextId)
     }
 
     private fun syncToDLTStorageHeader(inputStream: DataInputStream): Boolean {
@@ -95,29 +93,25 @@ class DltReader(private val filter: DltFilter) : LogReader {
     private fun readDLTMessagePayload(inputStream: DataInputStream,
                                       storageHeader: DltStorageHeader,
                                       extendedHeader: DltExtendedHeader,
-                                      payloadSize: Long,
-                                      isLog: Boolean): String {
+                                      payloadSize: Long): String {
         if (payloadSize <= 4L) {
             return ""
         }
 
-        if (!isLog) {
-            inputStream.skip(payloadSize.toLong())
-            return ""
-        }
-
-        for(i in 0 until extendedHeader.numberOfArguments) {
+        for (i in 0 until extendedHeader.numberOfArguments) {
             val typeInfo = inputStream.read32BitLong().toUInt()
-
-            val typeLength = typeInfo and 0x0EU
             val isString = typeInfo shr 9 and 1U == 1U
             val isRaw = typeInfo shr 10 and 1U == 1U
+            val containsVariableInfo = typeInfo shr 11 and 1U == 1U
 
-            if(isString || isRaw) {
+            if (isString || isRaw) {
                 // Why are the bytes here inverted ?!
-                val lengthByte1 = inputStream.readByte().toUInt()
-                val lengthByte2 = inputStream.readByte().toUInt()
-                val dataLength = lengthByte1 + lengthByte2 * 256U
+                val dataLength = inputStream.readByte().toUInt() + inputStream.readByte().toUInt() * 256U
+
+                if (containsVariableInfo) {
+                    val variableInfoSize = inputStream.readByte().toUInt() + inputStream.readByte().toUInt() * 256U
+                    inputStream.skip(variableInfoSize.toLong())
+                }
 
                 // Don't include the zero termination
                 val data = ByteArray(dataLength.toInt() - 1)

@@ -46,4 +46,6 @@ class DltExtendedHeader(var messageInfo: Byte, var numberOfArguments: Byte, var 
         if(standardHeader.isExtendedHeaderUsed()) inputStream.readUInt() else 0u,
         if(standardHeader.isExtendedHeaderUsed()) inputStream.readUInt() else 0u,
     )
+
+    fun isLog() = messageInfo.toUInt() and 0x0EU == 0U
 }
