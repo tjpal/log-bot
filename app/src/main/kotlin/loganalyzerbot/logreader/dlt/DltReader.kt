@@ -97,6 +97,7 @@ class DltReader(private val filter: DltFilter) : LogReader {
         if (payloadSize <= 4L) {
             return ""
         }
+        val stringBuilder = StringBuilder(100)
 
         for (i in 0 until extendedHeader.numberOfArguments) {
             val typeInfo = inputStream.read32BitLong().toUInt()
@@ -120,13 +121,14 @@ class DltReader(private val filter: DltFilter) : LogReader {
                 inputStream.readFully(data)
                 inputStream.skip(1) // Skip the zero termination
 
-                return data.toString(Charsets.US_ASCII)
+                stringBuilder.append(data.toString(Charsets.US_ASCII))
+                stringBuilder.append(" ")
             } else {
                 inputStream.skip(payloadSize - 4)
-                return ""
+                return stringBuilder.toString()
             }
         }
 
-        return ""
+        return stringBuilder.toString()
     }
 }
