@@ -8,7 +8,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.util.*
 
-class DltReader : LogReader {
+class DltReader(private val filter: DltFilter) : LogReader {
     override fun read(dltFile: File): Array<LogMessage> {
         val fileInputStream = FileInputStream(dltFile)
 
@@ -34,7 +34,7 @@ class DltReader : LogReader {
     }
 
     private fun readNextDLTMessage(fileInputStream: FileInputStream,
-                                   inputStream: DataInputStream): LogMessage {
+                                   inputStream: DataInputStream): LogMessage? {
         if(!syncToDLTStorageHeader(inputStream)) {
             throw Exception("Invalid DLT file")
         }
@@ -48,12 +48,19 @@ class DltReader : LogReader {
         val extendedHeader = DltExtendedHeader(inputStream, standardHeader)
 
         val endHeaderOffset = fileInputStream.channel.position()
+        val payloadSize = standardHeader.length + storageHeader.size -
+                          (endHeaderOffset - startHeaderOffset)
+
+        if(!filter.filter(extendedHeader.applicationId, extendedHeader.contextId)) {
+            fileInputStream.skip(payloadSize)
+            return null
+        }
+
         val isLog = extendedHeader.messageInfo.toInt() == 0 || extendedHeader.messageInfo.toInt() == 2
 
         val payload = readDLTMessagePayload(inputStream,
-                                            standardHeader,
                                             storageHeader,
-                                            (endHeaderOffset - startHeaderOffset).toInt(),
+                                            payloadSize,
                                             isLog)
 
         return LogMessage(payload,
@@ -82,14 +89,10 @@ class DltReader : LogReader {
     }
 
     private fun readDLTMessagePayload(inputStream: DataInputStream,
-                                      standardHeader: DltStandardHeader,
                                       storageHeader: DltStorageHeader,
-                                      readHeaderSize: Int,
+                                      payloadSize: Long,
                                       isLog: Boolean): String {
-        var payloadSize =
-            (standardHeader.length + storageHeader.size - readHeaderSize).toInt()
-
-        if (payloadSize == 0) {
+        if (payloadSize == 0L) {
             return ""
         }
 
@@ -102,7 +105,7 @@ class DltReader : LogReader {
         val header = ByteArray(10)
         inputStream.readFully(header)
 
-        val payload = ByteArray(payloadSize - 10)
+        val payload = ByteArray(payloadSize.toInt() - 10)
         inputStream.readFully(payload)
 
         // Skip the trailing zeros in the binary format of the message
