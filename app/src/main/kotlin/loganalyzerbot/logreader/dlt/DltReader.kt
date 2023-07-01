@@ -98,9 +98,12 @@ class DltReader(private val filter: DltFilter) : LogReader {
             return ""
         }
         val stringBuilder = StringBuilder(100)
+        var remainingPayload = payloadSize
 
         for (i in 0 until extendedHeader.numberOfArguments) {
             val typeInfo = inputStream.read32BitLong().toUInt()
+            remainingPayload -= 4
+
             val isString = typeInfo shr 9 and 1U == 1U
             val isRaw = typeInfo shr 10 and 1U == 1U
             val containsVariableInfo = typeInfo shr 11 and 1U == 1U
@@ -109,22 +112,26 @@ class DltReader(private val filter: DltFilter) : LogReader {
                 // Why are the bytes here inverted ?!
                 val dataLength = inputStream.readUnsignedByte().toUInt() +
                                  inputStream.readUnsignedByte().toUInt() * 256U
+                remainingPayload -= 2
 
                 if (containsVariableInfo) {
                     val variableInfoSize = inputStream.readUnsignedByte().toUInt() +
                                            inputStream.readUnsignedByte().toUInt() * 256U
+                    remainingPayload -= 2
+
                     inputStream.skip(variableInfoSize.toLong())
+                    remainingPayload -= variableInfoSize.toInt()
                 }
 
                 // Don't include the zero termination
                 val data = ByteArray(dataLength.toInt() - 1)
                 inputStream.readFully(data)
                 inputStream.skip(1) // Skip the zero termination
+                remainingPayload -= dataLength.toInt()
 
                 stringBuilder.append(data.toString(Charsets.US_ASCII))
-                stringBuilder.append(" ")
             } else {
-                inputStream.skip(payloadSize - 4)
+                inputStream.skip(remainingPayload)
                 return stringBuilder.toString()
             }
         }
