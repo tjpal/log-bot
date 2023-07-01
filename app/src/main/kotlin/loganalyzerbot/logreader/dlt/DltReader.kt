@@ -130,6 +130,8 @@ class DltReader(private val filter: DltFilter) : LogReader {
                 remainingPayload -= dataLength.toInt()
 
                 stringBuilder.append(data.toString(Charsets.US_ASCII))
+                if(i != 0)
+                    stringBuilder.append(" ")
             } else {
                 inputStream.skip(remainingPayload)
                 return stringBuilder.toString()
