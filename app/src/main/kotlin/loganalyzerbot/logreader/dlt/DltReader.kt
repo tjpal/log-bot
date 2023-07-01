@@ -9,6 +9,7 @@ import java.util.*
 
 class DltReader(private val filter: DltFilter) : LogReader {
     private val parameterReader = DltParameterReader()
+    private val stringBuilder = StringBuilder(100)
     override fun read(dltFile: File): Array<LogMessage> {
         val fileInputStream = FileInputStream(dltFile)
 
@@ -95,7 +96,9 @@ class DltReader(private val filter: DltFilter) : LogReader {
         if (payloadSize <= 4L) {
             return ""
         }
-        val stringBuilder = StringBuilder(100)
+        // Resetting the string reader is 2x faster than re-allocating it:
+        // https://www.baeldung.com/java-clear-stringbuilder-stringbuffer
+        stringBuilder.delete(0, stringBuilder.length)
         val payloadStartOffset = fileInputStream.channel.position()
 
         for (i in 0 until extendedHeader.numberOfArguments) {
