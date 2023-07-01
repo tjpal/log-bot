@@ -1,7 +1,6 @@
 package analyzer
 
 import loganalyzerbot.analyzer.definition.SequenceDefinition
-import loganalyzerbot.analyzer.report.SequenceResult
 import loganalyzerbot.analyzer.statemachine.SequenceStateMachine
 import loganalyzerbot.logreader.LogMessage
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -12,15 +11,15 @@ import kotlin.test.assertTrue
 
 class AnalyzerTest {
     @Test
-    fun matchSequenceStartAndEnd() {
+    fun simpleSequenceIsMatched() {
         val sequenceDef = SequenceDefinition("TestSequence", Regex("Start"), Regex("End"))
         val matches = runDefinitionOn(sequenceDef, "a", "Start", "x", "End", "y").matchedSequences
 
-        assertTrue(sequenceIsSuccessful("TestSequence", matches))
+        assertTrue(matches.find { it.matchedSequence.name == "TestSequence" && it.finished} != null)
     }
 
     @Test
-    fun sequenceWithoutAnd() {
+    fun sequenceWithoutEndIsMarkedAsUnfinished() {
         val sequenceDef = SequenceDefinition("TestSequence", Regex("Start"), Regex("End"))
 
         val matches = runDefinitionOn(sequenceDef, "a", "Start", "x", "y").matchedSequences
@@ -30,8 +29,28 @@ class AnalyzerTest {
         assertFalse(sequence.finished)
     }
 
-    private fun sequenceIsSuccessful(name: String, report: List<SequenceResult>): Boolean {
-        return report.find { it.matchedSequence.name == name && it.finished} != null
+    @Test
+    fun subSequencesAreMatched() {
+        val sequenceDef = SequenceDefinition("A", Regex("Start_A"), Regex("End_A"))
+        val subSequence1 = SequenceDefinition("B", Regex("Start_B"), Regex("End_B"))
+        val subSequence2 = SequenceDefinition("C", Regex("Start_C"), Regex("End_C"))
+
+        sequenceDef.subSequences.add(subSequence1)
+        sequenceDef.subSequences.add(subSequence2)
+
+        val matches = runDefinitionOn(sequenceDef,
+            "a", "Start_A", "x", "Start_B",
+            "y", "End_B", "z", "Start_C", "w", "End_C",
+            "End_A", "b").matchedSequences
+
+        val sequenceMatch = matches.find { it.matchedSequence.name == "A" && it.finished }
+        assertNotNull(sequenceMatch)
+
+        val subSequence1Match = sequenceMatch.matchedSubSequences.find { it.matchedSequence.name == "B" && it.finished }
+        assertNotNull(subSequence1Match)
+
+        val subSequence2Match = sequenceMatch.matchedSubSequences.find { it.matchedSequence.name == "C" && it.finished }
+        assertNotNull(subSequence2Match)
     }
 
     private fun runDefinitionOn(sequenceDef: SequenceDefinition, vararg messages: String): SequenceStateMachine {

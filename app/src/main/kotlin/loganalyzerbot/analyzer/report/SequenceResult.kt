@@ -2,4 +2,6 @@ package loganalyzerbot.analyzer.report
 
 import loganalyzerbot.analyzer.definition.SequenceDefinition
 
-class SequenceResult(val matchedSequence: SequenceDefinition, var finished: Boolean)
+class SequenceResult(val matchedSequence: SequenceDefinition, var finished: Boolean) {
+    val matchedSubSequences = mutableListOf<SequenceResult>()
+}
