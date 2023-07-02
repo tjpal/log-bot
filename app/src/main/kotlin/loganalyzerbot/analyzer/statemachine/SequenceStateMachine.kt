@@ -30,7 +30,7 @@ class SequenceStateMachine(private val rootSequenceDefinition: SequenceDefinitio
         if(!definition.entryRegex.matches(message.message))
             return false
 
-        sequenceStack.add(Pair(definition, SequenceResult(definition, false)))
+        sequenceStack.add(Pair(definition, SequenceResult(definition, false, message)))
         return true
     }
 
@@ -51,7 +51,7 @@ class SequenceStateMachine(private val rootSequenceDefinition: SequenceDefinitio
             it.entryRegex.matches(message.message)
         } ?: return false
 
-        val subSequenceEntry = Pair(subSequence, SequenceResult(subSequence, false))
+        val subSequenceEntry = Pair(subSequence, SequenceResult(subSequence, false, message))
         entry.second.matchedSubSequences.add(subSequenceEntry.second)
         sequenceStack.add(subSequenceEntry)
 
@@ -64,6 +64,7 @@ class SequenceStateMachine(private val rootSequenceDefinition: SequenceDefinitio
 
         sequenceStack.removeLast()
         entry.second.finished = true
+        entry.second.exitLogMessage = message
 
         if (sequenceStack.isNotEmpty()) {
             val parentEntry = sequenceStack.last()
