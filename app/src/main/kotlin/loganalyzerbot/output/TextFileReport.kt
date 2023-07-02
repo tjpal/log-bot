@@ -37,7 +37,7 @@ class TextFileReport {
     }
 
     private fun tabPrefix(level: Int, stringBuilder: StringBuilder) {
-        for(i in 0..level)
+        for(i in 0 until level)
             stringBuilder.append("\t")
     }
 }
