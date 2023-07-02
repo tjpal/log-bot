@@ -6,6 +6,7 @@ package loganalyzerbot
 
 import loganalyzerbot.logreader.dlt.DltFilter
 import loganalyzerbot.logreader.dlt.DltReader
+import loganalyzerbot.scriptinterface.ScriptRunner
 import java.io.File
 
 fun main(vararg args: String) {
@@ -13,6 +14,9 @@ fun main(vararg args: String) {
         println("Usage: log-bot <dlt-file>")
         return
     }
+
+    val scriptRunner = ScriptRunner()
+    scriptRunner.run(File("/tmp/test.kts"))
 
     DltReader(DltFilter.DEFAULT).read(File(args[0])). forEach {
         println(it.message)

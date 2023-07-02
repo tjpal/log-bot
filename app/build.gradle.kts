@@ -15,6 +15,17 @@ repositories {
 dependencies {
     implementation("com.google.guava:guava:31.1-jre")
 
+    implementation("org.jetbrains.kotlin:kotlin-scripting-common:1.8.20-RC")
+    implementation("org.jetbrains.kotlin:kotlin-scripting-jvm:1.8.20-RC")
+    implementation("org.jetbrains.kotlin:kotlin-scripting-dependencies:1.8.20-RC")
+    implementation("org.jetbrains.kotlin:kotlin-scripting-dependencies-maven:1.8.20-RC")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+
+    implementation("org.jetbrains.kotlin:kotlin-scripting-common")
+    implementation("org.jetbrains.kotlin:kotlin-scripting-jvm")
+    implementation("org.jetbrains.kotlin:kotlin-scripting-jvm-host")
+
+
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.1")
 }

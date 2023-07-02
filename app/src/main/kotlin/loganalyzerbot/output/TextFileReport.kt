@@ -4,7 +4,6 @@ import loganalyzerbot.analyzer.report.SequenceResult
 import java.io.File
 
 class TextFileReport {
-
     fun write(matchedSequences: List<SequenceResult>, file: File) {
         file.writeText(createReport(matchedSequences))
     }

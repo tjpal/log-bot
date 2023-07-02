@@ -1,11 +1,8 @@
 package loganalyzerbot.analyzer.definition
 
 class SequenceDefinition {
-    constructor(name: String, entryRegex: Regex, exitRegex: Regex) {
-        this.name = name
-        this.entryRegex = entryRegex
-        this.exitRegex = exitRegex
-    }
+    constructor(name: String, entryRegex: Regex) : this(name, entryRegex, Regex(""))
+    constructor(name: String, entryRegex: Regex, exitRegex: Regex) : this(name, entryRegex, exitRegex, mutableListOf())
 
     constructor(name: String, entryRegex: Regex, exitRegex: Regex, subSequences: MutableList<SequenceDefinition>) {
         this.name
