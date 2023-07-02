@@ -1,11 +1,9 @@
 package analyzer
 
+import SequenceStateMachineHelper
 import loganalyzerbot.analyzer.definition.SequenceDefinition
-import loganalyzerbot.analyzer.statemachine.SequenceStateMachine
-import loganalyzerbot.logreader.LogMessage
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
-import java.util.*
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -13,7 +11,7 @@ class AnalyzerTest {
     @Test
     fun simpleSequenceIsMatched() {
         val sequenceDef = SequenceDefinition("TestSequence", Regex("Start"), Regex("End"))
-        val matches = runDefinitionOn(sequenceDef, "a", "Start", "x", "End", "y").matchedSequences
+        val matches = SequenceStateMachineHelper.runDefinitionOn(sequenceDef, "a", "Start", "x", "End", "y").matchedSequences
 
         assertTrue(matches.find { it.matchedSequence.name == "TestSequence" && it.finished} != null)
     }
@@ -22,7 +20,7 @@ class AnalyzerTest {
     fun sequenceWithoutEndIsMarkedAsUnfinished() {
         val sequenceDef = SequenceDefinition("TestSequence", Regex("Start"), Regex("End"))
 
-        val matches = runDefinitionOn(sequenceDef, "a", "Start", "x", "y").matchedSequences
+        val matches = SequenceStateMachineHelper.runDefinitionOn(sequenceDef, "a", "Start", "x", "y").matchedSequences
 
         val sequence = matches.findLast { it.matchedSequence.name == "TestSequence" }
         assertNotNull(sequence)
@@ -38,7 +36,7 @@ class AnalyzerTest {
         sequenceDef.subSequences.add(subSequence1)
         sequenceDef.subSequences.add(subSequence2)
 
-        val matches = runDefinitionOn(sequenceDef,
+        val matches = SequenceStateMachineHelper.runDefinitionOn(sequenceDef,
             "a", "Start_A", "x", "Start_B",
             "y", "End_B", "z", "Start_C", "w", "End_C",
             "End_A", "b").matchedSequences
@@ -51,16 +49,5 @@ class AnalyzerTest {
 
         val subSequence2Match = sequenceMatch.matchedSubSequences.find { it.matchedSequence.name == "C" && it.finished }
         assertNotNull(subSequence2Match)
-    }
-
-    private fun runDefinitionOn(sequenceDef: SequenceDefinition, vararg messages: String): SequenceStateMachine {
-        val stateMachine = SequenceStateMachine(sequenceDef)
-
-        for(message in messages) {
-            stateMachine.process(LogMessage(message, Date(0), 0U, 0U))
-        }
-        stateMachine.onFinished()
-
-        return stateMachine
     }
 }
