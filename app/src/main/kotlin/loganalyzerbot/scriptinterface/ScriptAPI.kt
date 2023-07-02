@@ -3,18 +3,33 @@ package loganalyzerbot.scriptinterface
 import loganalyzerbot.analyzer.definition.SequenceDefinition
 
 fun sequenceStart(name: String, regex: String) {
-    println("Adding sequence $name")
-    ScriptHost.instance.sequences[name] = SequenceDefinition(name, Regex(regex))
+    val scriptHost = ScriptHost.instance
+    val definition = SequenceDefinition(name, Regex(regex))
+
+    scriptHost.allSequences[name] = definition
+
+    if(ScriptHost.instance.sequenceStack.isNotEmpty()) {
+        val parentSequence = scriptHost.sequenceStack.last()
+        parentSequence.subSequences.add(definition)
+    } else {
+        scriptHost.rootSequences.add(definition)
+    }
+
+    scriptHost.sequenceStack.add(definition)
 }
 
 fun sequenceEnd(name: String, regex: String) {
-    println("Adding sequence end $name")
-    val sequence = ScriptHost.instance.sequences[name]
-
-    if(sequence != null) {
-        sequence.exitRegex = Regex(regex)
-    } else {
-        println("Sequence $name not found. Add a sequene start definition first.")
+    if(ScriptHost.instance.sequenceStack.isEmpty()) {
+        println("No sequence started. Add a sequence start definition first.")
         return
     }
+
+    val currentSequence = ScriptHost.instance.sequenceStack.last()
+    if(currentSequence.name != name) {
+        println("Sequence $name not found. Add a sequence start definition first.")
+        return
+    }
+
+    currentSequence.exitRegex = Regex(regex)
+    ScriptHost.instance.sequenceStack.removeLast()
 }

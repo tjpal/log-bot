@@ -5,7 +5,7 @@ class SequenceDefinition {
     constructor(name: String, entryRegex: Regex, exitRegex: Regex) : this(name, entryRegex, exitRegex, mutableListOf())
 
     constructor(name: String, entryRegex: Regex, exitRegex: Regex, subSequences: MutableList<SequenceDefinition>) {
-        this.name
+        this.name = name
         this.entryRegex = entryRegex
         this.exitRegex = exitRegex
         this.subSequences = subSequences

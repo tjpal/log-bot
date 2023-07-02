@@ -7,5 +7,7 @@ class ScriptHost {
         var instance = ScriptHost()
     }
 
-    val sequences = mutableMapOf<String, SequenceDefinition>()
+    val rootSequences = mutableListOf<SequenceDefinition>()
+    val allSequences = mutableMapOf<String, SequenceDefinition>()
+    val sequenceStack = mutableListOf<SequenceDefinition>()
 }
