@@ -3,6 +3,7 @@ package loganalyzerbot
 import loganalyzerbot.analyzer.report.SequenceResult
 import loganalyzerbot.analyzer.statemachine.SequenceStateMachine
 import loganalyzerbot.cmdline.CommandLineArgs
+import loganalyzerbot.common.FileChangeWatcher
 import loganalyzerbot.logreader.LogMessage
 import loganalyzerbot.logreader.dlt.DltFilter
 import loganalyzerbot.logreader.dlt.DltReader
@@ -19,10 +20,28 @@ class Application {
         val reportFilename = File(cmdLineArgs.reportFilename)
 
         if(cmdLineArgs.developmentMode == true) {
-
+            runDevelopmentMode(dltDirectory, scriptDirectory, reportFilename)
         } else {
             runNormalMode(dltDirectory, scriptDirectory, reportFilename)
         }
+    }
+
+    private fun runDevelopmentMode(dltDirectory: File, scriptDirectory: File, reportFilename: File) {
+        val logFiles = parseDltFiles(dltDirectory)
+
+        val fileChangeWatcher = FileChangeWatcher(scriptDirectory.absolutePath, "kts") {
+            println("Script file changed. Re-running scripts and re-analyzing log files...")
+
+            ScriptHost.instance.reset()
+            runScriptFiles(scriptDirectory)
+            val result = analyzeLogMessages(logFiles)
+            writeReport(result, reportFilename)
+        }
+
+        fileChangeWatcher.watch()
+
+        println("Press any key")
+        readln()
     }
 
     private fun runNormalMode(dltDirectory: File, scriptDirectory: File, reportFilename: File) {
