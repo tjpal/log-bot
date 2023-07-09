@@ -4,8 +4,10 @@
 */
 package loganalyzerbot
 
+import kotlinx.cli.ArgParser
 import loganalyzerbot.analyzer.report.SequenceResult
 import loganalyzerbot.analyzer.statemachine.SequenceStateMachine
+import loganalyzerbot.cmdline.CommandLineArgs
 import loganalyzerbot.logreader.LogMessage
 import loganalyzerbot.logreader.dlt.DltFilter
 import loganalyzerbot.logreader.dlt.DltReader
@@ -15,15 +17,14 @@ import loganalyzerbot.scriptinterface.ScriptRunner
 import java.io.File
 import kotlin.script.experimental.api.ScriptDiagnostic
 
-fun main(vararg args: String) {
-    if(args.size != 3) {
-        println("Usage: log-bot <dlt-file-directory> <script-directory> <report-filename>")
-        return
-    }
+fun main(args: Array<String>) {
+    val parser = ArgParser("log-bot")
+    val cmdLineArgs = CommandLineArgs(parser)
+    parser.parse(args)
 
-    val dltDirectory = File(args[0])
-    val scriptDirectory = File(args[1])
-    val reportFilename = File(args[2])
+    val dltDirectory = File(cmdLineArgs.logDirectory)
+    val scriptDirectory = File(cmdLineArgs.scriptDirectory)
+    val reportFilename = File(cmdLineArgs.reportFilename)
 
     if(!runScriptFiles(scriptDirectory)) {
         println("ERROR: Script execution failed. See errors above.")
