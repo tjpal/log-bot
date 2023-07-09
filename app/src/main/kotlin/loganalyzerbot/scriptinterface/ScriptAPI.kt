@@ -4,7 +4,7 @@ import loganalyzerbot.analyzer.definition.SequenceDefinition
 
 fun sequenceStart(name: String, regex: String) {
     val scriptHost = ScriptHost.instance
-    val definition = SequenceDefinition(name, Regex(regex))
+    val definition = SequenceDefinition(name, regex)
 
     scriptHost.allSequences[name] = definition
 
@@ -30,6 +30,6 @@ fun sequenceEnd(name: String, regex: String) {
         return
     }
 
-    currentSequence.exitRegex = Regex(regex)
+    currentSequence.exitRegex = regex
     ScriptHost.instance.sequenceStack.removeLast()
 }

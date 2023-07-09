@@ -12,6 +12,10 @@ class RegexRegistry {
     private val regexMap = mutableMapOf<String, RegexEntry>()
     private val idToRegexMap = mutableMapOf<Int, RegexEntry>()
 
+    companion object {
+        val instance = RegexRegistry()
+    }
+
     fun registerRegex(regex: String): Int {
         val id = nextFreeRegexId++
         val regexEntry = RegexEntry(id, Pattern.compile(regex))

@@ -9,9 +9,9 @@ import kotlin.test.assertTrue
 class TextFileReportTest {
     @Test
     fun createReportWithSubsequences() {
-        val sequenceDef = SequenceDefinition("A", Regex("Start_A"), Regex("End_A"))
-        val subSequence1 = SequenceDefinition("B", Regex("Start_B"), Regex("End_B"))
-        val subSequence2 = SequenceDefinition("C", Regex("Start_C"), Regex("End_C"))
+        val sequenceDef = SequenceDefinition("A", "Start_A", "End_A")
+        val subSequence1 = SequenceDefinition("B", "Start_B", "End_B")
+        val subSequence2 = SequenceDefinition("C", "Start_C", "End_C")
 
         sequenceDef.subSequences.add(subSequence1)
         sequenceDef.subSequences.add(subSequence2)

@@ -1,18 +1,29 @@
 package loganalyzerbot.analyzer.definition
 
 class SequenceDefinition {
-    constructor(name: String, entryRegex: Regex) : this(name, entryRegex, Regex(""))
-    constructor(name: String, entryRegex: Regex, exitRegex: Regex) : this(name, entryRegex, exitRegex, mutableListOf())
+    var name: String = ""
+    var subSequences: MutableList<SequenceDefinition> = mutableListOf()
 
-    constructor(name: String, entryRegex: Regex, exitRegex: Regex, subSequences: MutableList<SequenceDefinition>) {
+    private var entryRegexId: Int = 0
+    private var exitRegexId: Int = 0
+    var exitRegex: String = ""
+        set(value) { exitRegexId = RegexRegistry.instance.registerRegex(value) }
+
+    constructor(name: String, entryRegex: String) : this(name, entryRegex, "")
+    constructor(name: String, entryRegex: String, exitRegex: String) : this(name, entryRegex, exitRegex, mutableListOf())
+
+    constructor(name: String, entryRegex: String, exitRegex: String, subSequences: MutableList<SequenceDefinition>) {
         this.name = name
-        this.entryRegex = entryRegex
-        this.exitRegex = exitRegex
+        this.entryRegexId = RegexRegistry.instance.registerRegex(entryRegex)
+        this.exitRegexId = RegexRegistry.instance.registerRegex(exitRegex)
         this.subSequences = subSequences
     }
 
-    var name: String = ""
-    var entryRegex: Regex = Regex("")
-    var exitRegex: Regex = Regex("")
-    var subSequences: MutableList<SequenceDefinition> = mutableListOf()
+    fun entryRegexMatches(input: String): Boolean {
+        return RegexRegistry.instance.matches(input, entryRegexId)
+    }
+
+    fun exitRegexMatches(input: String): Boolean {
+        return RegexRegistry.instance.matches(input, exitRegexId)
+    }
 }
