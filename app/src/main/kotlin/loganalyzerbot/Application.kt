@@ -85,6 +85,9 @@ class Application {
             logMessages.addAll(dltReader.read(it))
         }
 
+        var nextID: UInt = 0U
+        logMessages.forEach { it.id = nextID++ }
+
         return logMessages
     }
 

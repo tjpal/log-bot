@@ -6,4 +6,6 @@ data class LogMessage(
     val message: String,
     val time: Date,
     val contextId: UInt,
-    val subContextId: UInt)
+    val subContextId: UInt) {
+    var id: UInt = 0U
+}
