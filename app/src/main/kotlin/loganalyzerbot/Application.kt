@@ -14,11 +14,18 @@ import kotlin.script.experimental.api.ScriptDiagnostic
 
 class Application {
     fun run(cmdLineArgs: CommandLineArgs) {
-
         val dltDirectory = File(cmdLineArgs.logDirectory)
         val scriptDirectory = File(cmdLineArgs.scriptDirectory)
         val reportFilename = File(cmdLineArgs.reportFilename)
 
+        if(cmdLineArgs.developmentMode == true) {
+
+        } else {
+            runNormalMode(dltDirectory, scriptDirectory, reportFilename)
+        }
+    }
+
+    private fun runNormalMode(dltDirectory: File, scriptDirectory: File, reportFilename: File) {
         if(!runScriptFiles(scriptDirectory)) {
             println("ERROR: Script execution failed. See errors above.")
             return
