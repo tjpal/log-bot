@@ -7,7 +7,7 @@ import loganalyzerbot.logreader.LogMessage
  */
 interface RegexRegistry {
     companion object {
-        var instance = NonCachingRegexRegistry()
+        var instance: RegexRegistry = NonCachingRegexRegistry()
     }
     fun preprocessMessages(messages: List<LogMessage>)
     fun registerRegex(regex: String): Int

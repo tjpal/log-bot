@@ -7,7 +7,7 @@ data class RegexEntry(val id: Int, val pattern: Pattern)
 
 abstract class RegexRegistryBase : RegexRegistry {
     private var nextFreeRegexId = 0
-    private val regexMap = mutableMapOf<String, RegexEntry>()
+    protected val regexMap = mutableMapOf<String, RegexEntry>()
     protected val idToRegexMap = mutableMapOf<Int, RegexEntry>()
 
     override fun preprocessMessages(messages: List<LogMessage>) {

@@ -1,5 +1,6 @@
 package loganalyzerbot
 
+import loganalyzerbot.analyzer.definition.CachingRegexRegistry
 import loganalyzerbot.analyzer.definition.RegexRegistry
 import loganalyzerbot.analyzer.report.SequenceResult
 import loganalyzerbot.analyzer.statemachine.SequenceStateMachine
@@ -28,24 +29,30 @@ class Application {
     }
 
     private fun runDevelopmentMode(dltDirectory: File, scriptDirectory: File, reportFilename: File) {
-        val logFiles = parseDltFiles(dltDirectory)
+        val logMessages = parseDltFiles(dltDirectory)
+
+        RegexRegistry.instance = CachingRegexRegistry()
 
         val fileChangeWatcher = FileChangeWatcher(scriptDirectory.absolutePath, "kts") {
             println("Script file changed. Re-running scripts and re-analyzing log files...")
-
-            ScriptHost.instance.reset()
-
-            runScriptFiles(scriptDirectory)
-            RegexRegistry.instance.preprocessMessages(logFiles)
-
-            val result = analyzeLogMessages(logFiles)
-            writeReport(result, reportFilename)
+            processLogMessagesInDevMode(logMessages, scriptDirectory, reportFilename)
         }
 
+        processLogMessagesInDevMode(logMessages, scriptDirectory, reportFilename)
         fileChangeWatcher.watch()
 
         println("Press any key")
         readln()
+    }
+
+    private fun processLogMessagesInDevMode(logMessages: List<LogMessage>, scriptDirectory: File, reportFilename: File) {
+        ScriptHost.instance.reset()
+
+        runScriptFiles(scriptDirectory)
+        RegexRegistry.instance.preprocessMessages(logMessages)
+
+        val result = analyzeLogMessages(logMessages)
+        writeReport(result, reportFilename)
     }
 
     private fun runNormalMode(dltDirectory: File, scriptDirectory: File, reportFilename: File) {
