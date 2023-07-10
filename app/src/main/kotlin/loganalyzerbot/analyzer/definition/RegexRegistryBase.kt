@@ -4,14 +4,10 @@ import java.util.regex.Pattern
 
 data class RegexEntry(val id: Int, val pattern: Pattern)
 
-open class RegexRegistryBase : RegexRegistry {
+abstract class RegexRegistryBase : RegexRegistry {
     private var nextFreeRegexId = 0
     private val regexMap = mutableMapOf<String, RegexEntry>()
-    private val idToRegexMap = mutableMapOf<Int, RegexEntry>()
-
-    companion object {
-        val instance = RegexRegistryBase()
-    }
+    protected val idToRegexMap = mutableMapOf<Int, RegexEntry>()
 
     override fun registerRegex(regex: String): Int {
         val id = nextFreeRegexId++
@@ -21,10 +17,5 @@ open class RegexRegistryBase : RegexRegistry {
         idToRegexMap[id] = regexEntry
 
         return id
-    }
-
-    override fun matches(input: String, id: Int): Boolean {
-        val regexEntry = idToRegexMap[id] ?: return false
-        return regexEntry.pattern.matcher(input).matches()
     }
 }
