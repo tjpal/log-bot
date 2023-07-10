@@ -1,5 +1,6 @@
 package loganalyzerbot
 
+import loganalyzerbot.analyzer.definition.RegexRegistry
 import loganalyzerbot.analyzer.report.SequenceResult
 import loganalyzerbot.analyzer.statemachine.SequenceStateMachine
 import loganalyzerbot.cmdline.CommandLineArgs
@@ -33,7 +34,10 @@ class Application {
             println("Script file changed. Re-running scripts and re-analyzing log files...")
 
             ScriptHost.instance.reset()
+
             runScriptFiles(scriptDirectory)
+            RegexRegistry.instance.preprocessMessages(logFiles)
+
             val result = analyzeLogMessages(logFiles)
             writeReport(result, reportFilename)
         }
@@ -51,6 +55,8 @@ class Application {
         }
 
         val logMessages = parseDltFiles(dltDirectory)
+        RegexRegistry.instance.preprocessMessages(logMessages)
+
         val results = analyzeLogMessages(logMessages)
 
         writeReport(results, reportFilename)
