@@ -5,6 +5,7 @@ import loganalyzerbot.analyzer.definition.RegexRegistry
 import loganalyzerbot.analyzer.report.SequenceResult
 import loganalyzerbot.analyzer.statemachine.SequenceStateMachine
 import loganalyzerbot.cmdline.CommandLineArgs
+import loganalyzerbot.cmdline.SORTMODE
 import loganalyzerbot.common.FileChangeWatcher
 import loganalyzerbot.logreader.LogMessage
 import loganalyzerbot.logreader.dlt.DltFilter
@@ -22,14 +23,14 @@ class Application {
         val reportFilename = File(cmdLineArgs.reportFilename)
 
         if(cmdLineArgs.developmentMode == true) {
-            runDevelopmentMode(dltDirectory, scriptDirectory, reportFilename)
+            runDevelopmentMode(dltDirectory, scriptDirectory, reportFilename, cmdLineArgs.sortmode)
         } else {
-            runNormalMode(dltDirectory, scriptDirectory, reportFilename)
+            runNormalMode(dltDirectory, scriptDirectory, reportFilename, cmdLineArgs.sortmode)
         }
     }
 
-    private fun runDevelopmentMode(dltDirectory: File, scriptDirectory: File, reportFilename: File) {
-        val logMessages = parseDltFiles(dltDirectory)
+    private fun runDevelopmentMode(dltDirectory: File, scriptDirectory: File, reportFilename: File, sortmode: SORTMODE) {
+        val logMessages = parseDltFiles(dltDirectory, sortmode)
 
         RegexRegistry.instance = CachingRegexRegistry()
 
@@ -55,13 +56,13 @@ class Application {
         writeReport(result, reportFilename)
     }
 
-    private fun runNormalMode(dltDirectory: File, scriptDirectory: File, reportFilename: File) {
+    private fun runNormalMode(dltDirectory: File, scriptDirectory: File, reportFilename: File, sortmode: SORTMODE) {
         if(!runScriptFiles(scriptDirectory)) {
             println("ERROR: Script execution failed. See errors above.")
             return
         }
 
-        val logMessages = parseDltFiles(dltDirectory)
+        val logMessages = parseDltFiles(dltDirectory, sortmode)
         RegexRegistry.instance.preprocessMessages(logMessages)
 
         val results = analyzeLogMessages(logMessages)
@@ -88,7 +89,7 @@ class Application {
         return errors.isEmpty()
     }
 
-    private fun parseDltFiles(dltDirectory: File): List<LogMessage> {
+    private fun parseDltFiles(dltDirectory: File, sortmode: SORTMODE): List<LogMessage> {
         val logMessages = mutableListOf<LogMessage>()
 
         dltDirectory.walkBottomUp().
@@ -96,6 +97,12 @@ class Application {
         forEach {
             val dltReader = DltReader(DltFilter.DEFAULT)
             logMessages.addAll(dltReader.read(it))
+        }
+
+        if(sortmode == SORTMODE.STORAGE) {
+            logMessages.sortBy { it.storageTimestamp }
+        } else {
+            logMessages.sortBy { it.creationTimestamp }
         }
 
         var nextID: UInt = 0U
