@@ -10,10 +10,12 @@ import loganalyzerbot.common.FileChangeWatcher
 import loganalyzerbot.logreader.LogMessage
 import loganalyzerbot.logreader.dlt.DltFilter
 import loganalyzerbot.logreader.dlt.DltReader
+import loganalyzerbot.output.ReadLogFileReport
 import loganalyzerbot.output.TextFileReport
 import loganalyzerbot.scriptinterface.ScriptHost
 import loganalyzerbot.scriptinterface.ScriptRunner
 import java.io.File
+import java.nio.file.Paths
 import kotlin.script.experimental.api.ScriptDiagnostic
 
 class Application {
@@ -31,6 +33,9 @@ class Application {
 
     private fun runDevelopmentMode(dltDirectory: File, scriptDirectory: File, reportFilename: File, sortmode: SORTMODE) {
         val logMessages = parseDltFiles(dltDirectory, sortmode)
+
+        val readLogFileReport = ReadLogFileReport()
+        readLogFileReport.write(logMessages, Paths.get(reportFilename.parent, "log.txt").toFile())
 
         RegexRegistry.instance = CachingRegexRegistry()
 
