@@ -5,13 +5,12 @@ import loganalyzerbot.logreader.LogReader
 import java.io.DataInputStream
 import java.io.File
 import java.io.FileInputStream
-import java.util.*
 
 class DltReader(private val filter: DltFilter) : LogReader {
     private val parameterReader = DltParameterReader()
     private val stringBuilder = StringBuilder(100)
-    override fun read(dltFile: File): Array<LogMessage> {
-        val fileInputStream = FileInputStream(dltFile)
+    override fun read(logFile: File): List<LogMessage> {
+        val fileInputStream = FileInputStream(logFile)
 
         val inputStream = DataInputStream(fileInputStream)
         val dltMessages = readDLTMessages(fileInputStream, inputStream)
@@ -21,7 +20,7 @@ class DltReader(private val filter: DltFilter) : LogReader {
     }
 
     private fun readDLTMessages(fileInputStream: FileInputStream,
-                                inputStream: DataInputStream): Array<LogMessage> {
+                                inputStream: DataInputStream): List<LogMessage> {
         val dltMessages = mutableListOf<LogMessage>()
 
         while (inputStream.available() > 0) {
@@ -31,7 +30,7 @@ class DltReader(private val filter: DltFilter) : LogReader {
                 dltMessages.add(dltMessage)
         }
 
-        return dltMessages.toTypedArray()
+        return dltMessages
     }
 
     private fun readNextDLTMessage(fileInputStream: FileInputStream,
