@@ -68,6 +68,7 @@ class DltReader(private val filter: DltFilter) : LogReader {
         return LogMessage(payload,
                           extraHeader.timestamp,
                           storageHeader.seconds * 1000 + storageHeader.microseconds,
+                "",
                           extendedHeader.applicationId,
                           extendedHeader.contextId)
     }
