@@ -2,8 +2,6 @@ package loganalyzerbot
 
 import loganalyzerbot.analyzer.definition.CachingRegexRegistry
 import loganalyzerbot.analyzer.definition.RegexRegistry
-import loganalyzerbot.analyzer.report.SequenceResult
-import loganalyzerbot.analyzer.statemachine.SequenceStateMachine
 import loganalyzerbot.cmdline.CommandLineArgs
 import loganalyzerbot.cmdline.LOGTYPE
 import loganalyzerbot.cmdline.SORTMODE
@@ -54,8 +52,6 @@ class Application {
 
         runScriptFiles(scriptDirectory)
         RegexRegistry.instance.preprocessMessages(logMessages)
-
-        analyzeLogMessages(logMessages)
     }
 
     private fun runNormalMode(logFiles: List<File>, scriptDirectory: File, reportFilename: File,
@@ -67,8 +63,6 @@ class Application {
 
         val logMessages = readLogMessages(logFiles, sortMode, logType)
         RegexRegistry.instance.preprocessMessages(logMessages)
-
-        analyzeLogMessages(logMessages)
     }
 
     private fun runScriptFiles(scriptFileDirectory: File): Boolean {
@@ -114,20 +108,6 @@ class Application {
         return logMessages
     }
 
-    private fun analyzeLogMessages(logMessages: List<LogMessage>): List<SequenceResult>{
-        val sequences = ScriptHost.instance.rootSequences
-        val stateMachines = sequences.map { SequenceStateMachine(it) }
-
-        logMessages.forEach { logMessage ->
-            stateMachines.forEach { stateMachine ->
-                stateMachine.process(logMessage)
-            }
-        }
-
-        stateMachines.forEach { it.onFinished() }
-
-        return stateMachines.map { it.matchedSequences }.flatten()
-    }
     private fun listLogFiles(logSource: File, logType: LOGTYPE): List<File> {
         if(logSource.isFile()) {
             return listOf(logSource)

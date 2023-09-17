@@ -1,6 +1,5 @@
 package analyzer
 
-import SequenceStateMachineHelper
 import loganalyzerbot.analyzer.definition.SequenceDefinition
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
