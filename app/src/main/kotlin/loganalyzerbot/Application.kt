@@ -112,7 +112,7 @@ class Application {
 
         if(sortMode == SORTMODE.STORAGE) {
             logMessages.sortBy { it.storageTimestamp }
-        } else {
+        } else if(sortMode == SORTMODE.CREATION){
             logMessages.sortBy { it.creationTimestamp }
         }
 
