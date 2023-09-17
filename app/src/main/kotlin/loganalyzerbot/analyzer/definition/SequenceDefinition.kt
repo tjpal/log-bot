@@ -1,5 +1,7 @@
 package loganalyzerbot.analyzer.definition
 
+import loganalyzerbot.analyzer.utilities.RegexRegistry
+
 class SequenceDefinition {
     var name: String = ""
     var subSequences: MutableList<SequenceDefinition> = mutableListOf()

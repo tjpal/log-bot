@@ -1,4 +1,4 @@
-package loganalyzerbot.analyzer.definition
+package loganalyzerbot.analyzer.utilities
 
 class NonCachingRegexRegistry : RegexRegistryBase() {
     override fun matches(input: String, id: Int): Boolean {

@@ -1,4 +1,4 @@
-package loganalyzerbot.analyzer.definition
+package loganalyzerbot.analyzer.utilities
 
 import loganalyzerbot.logreader.LogMessage
 import java.util.regex.Pattern

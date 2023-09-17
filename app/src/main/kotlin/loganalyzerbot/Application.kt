@@ -1,7 +1,7 @@
 package loganalyzerbot
 
-import loganalyzerbot.analyzer.definition.CachingRegexRegistry
-import loganalyzerbot.analyzer.definition.RegexRegistry
+import loganalyzerbot.analyzer.utilities.CachingRegexRegistry
+import loganalyzerbot.analyzer.utilities.RegexRegistry
 import loganalyzerbot.cmdline.CommandLineArgs
 import loganalyzerbot.cmdline.LOGTYPE
 import loganalyzerbot.cmdline.SORTMODE
