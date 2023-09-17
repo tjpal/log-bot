@@ -102,7 +102,7 @@ class Application {
         }
     }
 
-    private fun parseDltFiles(dltDirectory: File, sortmode: SORTMODE): List<LogMessage> {
+    private fun parseDltFiles(dltDirectory: File, sortMode: SORTMODE): List<LogMessage> {
         val logMessages = mutableListOf<LogMessage>()
 
         dltDirectory.walkBottomUp().
@@ -112,7 +112,7 @@ class Application {
             logMessages.addAll(dltReader.read(it))
         }
 
-        if(sortmode == SORTMODE.STORAGE) {
+        if(sortMode == SORTMODE.STORAGE) {
             logMessages.sortBy { it.storageTimestamp }
         } else {
             logMessages.sortBy { it.creationTimestamp }
