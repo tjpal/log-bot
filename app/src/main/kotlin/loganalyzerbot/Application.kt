@@ -11,6 +11,7 @@ import loganalyzerbot.common.FileChangeWatcher
 import loganalyzerbot.logreader.LogMessage
 import loganalyzerbot.logreader.dlt.DltFilter
 import loganalyzerbot.logreader.dlt.DltReader
+import loganalyzerbot.logreader.logcat.LogcatReader
 import loganalyzerbot.output.ReadLogFileReport
 import loganalyzerbot.output.TextFileReport
 import loganalyzerbot.scriptinterface.ScriptHost
@@ -103,7 +104,7 @@ class Application {
 
         val logReader = when(logType) {
             LOGTYPE.DLT -> DltReader(DltFilter.DEFAULT)
-            LOGTYPE.LOGCAT -> TODO()
+            LOGTYPE.LOGCAT -> LogcatReader(ScriptHost.instance.logcatFilter)
         }
 
         logFiles.forEach { logFile ->
