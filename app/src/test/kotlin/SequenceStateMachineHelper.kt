@@ -8,7 +8,7 @@ open class SequenceStateMachineHelper {
             val stateMachine = SequenceStateMachine(sequenceDef)
 
             for(message in messages) {
-                stateMachine.process(LogMessage(message, 0, 0, 0U, 0U))
+                stateMachine.process(LogMessage(message, 0, 0, "",0U, 0U))
             }
             stateMachine.onFinished()
 

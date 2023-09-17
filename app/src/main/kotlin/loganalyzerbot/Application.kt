@@ -5,6 +5,7 @@ import loganalyzerbot.analyzer.definition.RegexRegistry
 import loganalyzerbot.analyzer.report.SequenceResult
 import loganalyzerbot.analyzer.statemachine.SequenceStateMachine
 import loganalyzerbot.cmdline.CommandLineArgs
+import loganalyzerbot.cmdline.LOGTYPE
 import loganalyzerbot.cmdline.SORTMODE
 import loganalyzerbot.common.FileChangeWatcher
 import loganalyzerbot.logreader.LogMessage
@@ -92,6 +93,13 @@ class Application {
         errors.forEach { println(it) }
 
         return errors.isEmpty()
+    }
+
+    private fun readLogMessages(logSource: File, sortMode: SORTMODE, logType: LOGTYPE): List<LogMessage> {
+        when(logType) {
+            LOGTYPE.DLT -> return parseDltFiles(logSource, sortMode)
+            LOGTYPE.LOGCAT -> TODO()
+        }
     }
 
     private fun parseDltFiles(dltDirectory: File, sortmode: SORTMODE): List<LogMessage> {
