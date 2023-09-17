@@ -1,5 +1,6 @@
 package loganalyzerbot
 
+import loganalyzerbot.analyzer.Analyzer
 import loganalyzerbot.analyzer.utilities.CachingRegexRegistry
 import loganalyzerbot.analyzer.utilities.RegexRegistry
 import loganalyzerbot.cmdline.CommandLineArgs
@@ -62,7 +63,9 @@ class Application {
         }
 
         val logMessages = readLogMessages(logFiles, sortMode, logType)
-        RegexRegistry.instance.preprocessMessages(logMessages)
+
+        val analyzer = Analyzer()
+        analyzer.analyze(logMessages, ScriptHost.instance.sequences)
     }
 
     private fun runScriptFiles(scriptFileDirectory: File): Boolean {

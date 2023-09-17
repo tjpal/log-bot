@@ -8,14 +8,11 @@ class ScriptHost {
         var instance = ScriptHost()
     }
 
-    val rootSequences = mutableListOf<SequenceDefinition>()
-    val allSequences = mutableMapOf<String, SequenceDefinition>()
-    val sequenceStack = mutableListOf<SequenceDefinition>()
+    val sequences = mutableListOf<SequenceDefinition>()
     val logcatFilter = mutableListOf<LogcatFilter>()
 
     fun reset() {
-        rootSequences.clear()
-        allSequences.clear()
-        sequenceStack.clear()
+        sequences.clear()
+        logcatFilter.clear()
     }
 }

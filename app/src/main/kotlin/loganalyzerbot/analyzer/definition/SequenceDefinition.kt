@@ -1,31 +1,29 @@
 package loganalyzerbot.analyzer.definition
 
-import loganalyzerbot.analyzer.utilities.RegexRegistry
+import loganalyzerbot.analyzer.matcher.Matcher
+import loganalyzerbot.analyzer.matcher.SequenceMatcher
+import java.util.regex.Pattern
 
-class SequenceDefinition {
-    var name: String = ""
-    var subSequences: MutableList<SequenceDefinition> = mutableListOf()
+class SequenceDefinition(val name: String) : DefinitionNode() {
+    val children = mutableListOf<DefinitionNode>()
 
-    private var entryRegexId: Int = 0
-    private var exitRegexId: Int = 0
-    var exitRegex: String = ""
-        set(value) { exitRegexId = RegexRegistry.instance.registerRegex(value) }
+    fun sequence(name: String, initBlock: SequenceDefinition.() -> Unit): SequenceDefinition {
+        val sequence = SequenceDefinition(name)
+        sequence.initBlock()
 
-    constructor(name: String, entryRegex: String) : this(name, entryRegex, "")
-    constructor(name: String, entryRegex: String, exitRegex: String) : this(name, entryRegex, exitRegex, mutableListOf())
-
-    constructor(name: String, entryRegex: String, exitRegex: String, subSequences: MutableList<SequenceDefinition>) {
-        this.name = name
-        this.entryRegexId = RegexRegistry.instance.registerRegex(entryRegex)
-        this.exitRegexId = RegexRegistry.instance.registerRegex(exitRegex)
-        this.subSequences = subSequences
+        children.add(sequence)
+        return sequence
     }
 
-    fun entryRegexMatches(input: String): Boolean {
-        return RegexRegistry.instance.matches(input, entryRegexId)
+    fun expect(regex: String, initBlock: ExpectDefinition.() -> Unit = {}): ExpectDefinition {
+        val expect = ExpectDefinition(Pattern.compile(regex))
+        expect.initBlock()
+
+        children.add(expect)
+        return expect
     }
 
-    fun exitRegexMatches(input: String): Boolean {
-        return RegexRegistry.instance.matches(input, exitRegexId)
+    override fun createMatcher(): Matcher {
+        return SequenceMatcher(children.map { it.createMatcher() })
     }
 }
