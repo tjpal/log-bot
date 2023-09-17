@@ -21,19 +21,21 @@ import kotlin.script.experimental.api.ScriptDiagnostic
 
 class Application {
     fun run(cmdLineArgs: CommandLineArgs) {
-        val dltDirectory = File(cmdLineArgs.logDirectory)
+        val logFiles = listLogFiles(File(cmdLineArgs.logSource), cmdLineArgs.logtype)
         val scriptDirectory = File(cmdLineArgs.scriptDirectory)
         val reportFilename = File(cmdLineArgs.reportFilename)
 
         if(cmdLineArgs.developmentMode == true) {
-            runDevelopmentMode(dltDirectory, scriptDirectory, reportFilename, cmdLineArgs.sortmode)
+            runDevelopmentMode(logFiles, scriptDirectory, reportFilename, cmdLineArgs.sortmode, cmdLineArgs.logtype)
         } else {
-            runNormalMode(dltDirectory, scriptDirectory, reportFilename, cmdLineArgs.sortmode)
+            runNormalMode(logFiles, scriptDirectory, reportFilename, cmdLineArgs.sortmode, cmdLineArgs.logtype)
         }
     }
 
-    private fun runDevelopmentMode(dltDirectory: File, scriptDirectory: File, reportFilename: File, sortmode: SORTMODE) {
-        val logMessages = parseDltFiles(dltDirectory, sortmode)
+    private fun runDevelopmentMode(logFiles: List<File>, scriptDirectory: File,
+                                   reportFilename: File, sortMode: SORTMODE,
+                                   logType: LOGTYPE) {
+        val logMessages = readLogMessages(logFiles, sortMode, logType)
 
         val readLogFileReport = ReadLogFileReport()
         readLogFileReport.write(logMessages, Paths.get(reportFilename.parent, "log.txt").toFile())
@@ -62,13 +64,14 @@ class Application {
         writeReport(result, reportFilename)
     }
 
-    private fun runNormalMode(dltDirectory: File, scriptDirectory: File, reportFilename: File, sortmode: SORTMODE) {
+    private fun runNormalMode(logFiles: List<File>, scriptDirectory: File, reportFilename: File,
+                              sortMode: SORTMODE, logType: LOGTYPE) {
         if(!runScriptFiles(scriptDirectory)) {
             println("ERROR: Script execution failed. See errors above.")
             return
         }
 
-        val logMessages = parseDltFiles(dltDirectory, sortmode)
+        val logMessages = readLogMessages(logFiles, sortMode, logType)
         RegexRegistry.instance.preprocessMessages(logMessages)
 
         val results = analyzeLogMessages(logMessages)
@@ -95,21 +98,16 @@ class Application {
         return errors.isEmpty()
     }
 
-    private fun readLogMessages(logSource: File, sortMode: SORTMODE, logType: LOGTYPE): List<LogMessage> {
-        when(logType) {
-            LOGTYPE.DLT -> return parseDltFiles(logSource, sortMode)
-            LOGTYPE.LOGCAT -> TODO()
-        }
-    }
-
-    private fun parseDltFiles(dltDirectory: File, sortMode: SORTMODE): List<LogMessage> {
+    private fun readLogMessages(logFiles: List<File>, sortMode: SORTMODE, logType: LOGTYPE): List<LogMessage> {
         val logMessages = mutableListOf<LogMessage>()
 
-        dltDirectory.walkBottomUp().
-        filter { it.isFile && it.extension == "dlt" }.
-        forEach {
-            val dltReader = DltReader(DltFilter.DEFAULT)
-            logMessages.addAll(dltReader.read(it))
+        val logReader = when(logType) {
+            LOGTYPE.DLT -> DltReader(DltFilter.DEFAULT)
+            LOGTYPE.LOGCAT -> TODO()
+        }
+
+        logFiles.forEach { logFile ->
+            logMessages.addAll(logReader.read(logFile))
         }
 
         if(sortMode == SORTMODE.STORAGE) {
@@ -145,5 +143,25 @@ class Application {
 
         println(report)
         textFileReport.write(results, reportFilename)
+    }
+
+    private fun listLogFiles(logSource: File, logType: LOGTYPE): List<File> {
+        if(logSource.isFile()) {
+            return listOf(logSource)
+        }
+
+        if(!logSource.isDirectory()) {
+            throw IllegalArgumentException("Log source must be a file or directory")
+        }
+
+        val logFileExtension = when(logType) {
+            LOGTYPE.DLT -> "dlt"
+            LOGTYPE.LOGCAT -> "txt"
+        }
+
+        return logSource.
+            walkBottomUp().
+            filter { it.isFile && it.extension == logFileExtension }.
+            toList()
     }
 }
