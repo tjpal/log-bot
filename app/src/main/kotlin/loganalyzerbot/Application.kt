@@ -12,12 +12,9 @@ import loganalyzerbot.logreader.LogMessage
 import loganalyzerbot.logreader.dlt.DltFilter
 import loganalyzerbot.logreader.dlt.DltReader
 import loganalyzerbot.logreader.logcat.LogcatReader
-import loganalyzerbot.output.ReadLogFileReport
-import loganalyzerbot.output.TextFileReport
 import loganalyzerbot.scriptinterface.ScriptHost
 import loganalyzerbot.scriptinterface.ScriptRunner
 import java.io.File
-import java.nio.file.Paths
 import kotlin.script.experimental.api.ScriptDiagnostic
 
 class Application {
@@ -37,9 +34,6 @@ class Application {
                                    reportFilename: File, sortMode: SORTMODE,
                                    logType: LOGTYPE) {
         val logMessages = readLogMessages(logFiles, sortMode, logType)
-
-        val readLogFileReport = ReadLogFileReport()
-        readLogFileReport.write(logMessages, Paths.get(reportFilename.parent, "log.txt").toFile())
 
         RegexRegistry.instance = CachingRegexRegistry()
 
@@ -61,8 +55,7 @@ class Application {
         runScriptFiles(scriptDirectory)
         RegexRegistry.instance.preprocessMessages(logMessages)
 
-        val result = analyzeLogMessages(logMessages)
-        writeReport(result, reportFilename)
+        analyzeLogMessages(logMessages)
     }
 
     private fun runNormalMode(logFiles: List<File>, scriptDirectory: File, reportFilename: File,
@@ -75,9 +68,7 @@ class Application {
         val logMessages = readLogMessages(logFiles, sortMode, logType)
         RegexRegistry.instance.preprocessMessages(logMessages)
 
-        val results = analyzeLogMessages(logMessages)
-
-        writeReport(results, reportFilename)
+        analyzeLogMessages(logMessages)
     }
 
     private fun runScriptFiles(scriptFileDirectory: File): Boolean {
@@ -137,15 +128,6 @@ class Application {
 
         return stateMachines.map { it.matchedSequences }.flatten()
     }
-
-    private fun writeReport(results: List<SequenceResult>, reportFilename: File) {
-        val textFileReport = TextFileReport()
-        val report = textFileReport.createReport(results)
-
-        println(report)
-        textFileReport.write(results, reportFilename)
-    }
-
     private fun listLogFiles(logSource: File, logType: LOGTYPE): List<File> {
         if(logSource.isFile()) {
             return listOf(logSource)
